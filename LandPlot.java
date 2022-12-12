@@ -45,10 +45,6 @@ public class LandPlot {
         return landPeninsulas;
     }
 
-    private int[] singleLandStrip(int[][] arrayLandPlot) {
-        return arrayLandPlot[0];
-    }
-
     public void printLandStrips() {
         for (int[] landStrip : landPlot) {
             System.out.println(Arrays.toString(landStrip));
