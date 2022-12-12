@@ -56,9 +56,8 @@ public class Main {
                 LandPlot newLandPlot = new LandPlot(size);
         
                 newLandPlot.printLandStrips();
-                int[][] landPlot = newLandPlot.getLandPlot();
         
-                newLandPlot.findLand(landPlot);
+                newLandPlot.findBorderlands();
         
                 int[][] borderLands = newLandPlot.getBorderLands();
                 System.out.println();
