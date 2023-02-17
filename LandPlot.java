@@ -3,23 +3,24 @@ import java.util.Arrays;
 import java.util.Random;
 
 /**
- * Write a description of class LandPlot here.
+ * LandPlot makes an array of 1's and 0's and considers 0's water, 1's land.
+ * {@code findLand} is a recursive method that finds all the land
+ * connected to land at the border
  *
- * @author (your name)
- * @version (a version number or a date)
+ * @author Vladimir Andral
+ * @version 17/2/2023
  */
 public class LandPlot {
-
     Random random = new Random();
-    private int[][] landPlot;
-    private int[][] borderLands;
-    private int[][] landPeninsulas;
-    private int[][] islands;
-    private int landStripLength;
+    private final int[][] landPlot;
+    private int[][] islandCoordinates;
+    private ArrayList<int[]> landPeninsulas = new ArrayList<>();
+    private final int landMarker;
+    private ArrayList<int[]> islands = new ArrayList<>();
 
-    public LandPlot(int length) {
+    public LandPlot(int length, int landMarker) {
 
-        landStripLength = length;
+        this.landMarker = landMarker;
         
         // Setting the field landPlot
         this.landPlot = new int[length][];
@@ -28,170 +29,142 @@ public class LandPlot {
             for (int p = 0; p < length; p++) {
                 horizontalStrip[p] = random.nextInt(0,2);
             }
-
             landPlot[i] = horizontalStrip;
         }
+
+    }
+    
+    public LandPlot(int length, int height, int landMarker) {
+
+        this.landMarker = landMarker;
+        
+        // Setting the field landPlot
+        this.landPlot = new int[height][length];
+        for (int i = 0; i < height; i++) {
+            int[] horizontalStrip = new int[length];
+            for (int p = 0; p < length; p++) {
+                horizontalStrip[p] = random.nextInt(0,2);
+            }
+            landPlot[i] = horizontalStrip;
+        }
+
     }
 
     public int[][] getLandPlot() {
         return landPlot;
     }
 
-    public int[][] getBorderLands() {
-        return borderLands;
+    public int[][] islandCoordinates() {
+        return islandCoordinates;
     }
+
 
     public int[][] getLandPeninsulas() {
-        return landPeninsulas;
+        return landPeninsulas.toArray(new int[landPeninsulas.size()][]);
     }
 
-    public void printLandStrips() {
+    private void getIslands() {
+        for (int y = 0; y < landPlot.length; y++) {
+            for (int x = 0; x < landPlot[0].length; x++) {
+                if (landPlot[y][x] == 1) {
+                    int[] toAdd = {y+1, x+1};
+                    islands.add(toAdd);
+                }
+            }
+        }
+        islandCoordinates = islands.toArray(new int[islands.size()][islands.size()]);
+    }
+
+    public void printPlot() {
         for (int[] landStrip : landPlot) {
             System.out.println(Arrays.toString(landStrip));
         }
     }
 
-    // Should this return void?
-    public void getIslands() {
 
-        // // Recheck what variables are needed, should some be fields?
-        // int[][] arrayLandPlot = landPlot;
-        // int[] singleLandStrip = singleLandStrip(arrayLandPlot);
-        // int checkLimit = (int) Math.ceil(singleLandStrip.length/2)+1;
-        // int[] checkLimitCoordinates = {checkLimit, checkLimit};
-        // int startCoordinates = 0;
+    public void findLands() {
         
-        // while (startCoordinates != checkLimit) {
-        //     int[] thisLandStrip = arrayLandPlot[startCoordinates];
-        //     for (int pos = 0; pos < thisLandStrip.length; pos++) {
+        int x = 0;
+        int y = 0;
 
-        //     }
+        while (x < landPlot[0].length) {
 
-        //     startCoordinates++;
-        // }
-
-        // // Attempt at recursive method
-        // if (checkLimitCoordinates[0] == checkLimit) {
-
-        // }
-
-        this.getIslands();
-
-
-
-    }
-
-    // Public or private?
-    public void findBorderlands() {
-        
-        ArrayList<int[]> landCoordinates = new ArrayList<>();
-        if (borderLands != null) {
-            System.out.println("Borderlands have already been found");
-        } else if (landStripLength == 2) {
-            System.out.println("A 2x2 plot cannot have any islands");
-            for (int row = 0; row < landStripLength; row++) {
-                for (int collumn = 0; collumn < landStripLength; collumn++) {
-                    if (landPlot[row][collumn] == 1) {
-                        int[] land = {row, collumn};
-                        landCoordinates.add(land);
-                    }
-                }
+            if (landPlot[y][x] == 1) {
+                recursiveFindLands(y, x);
             }
-            int[][] landCoordinatesArray = landCoordinates.toArray(new int[landCoordinates.size()][]);
-            this.borderLands = landCoordinatesArray;    
-        } else {
-
-            int collumn = 0;
-            int row = 0;
-            while (!(collumn == 0 && row == 1)) {
-                
-                // Top Traverse
-                if (collumn == 0 && row == 0) {
-                    int[] topStrip = landPlot[0];
-                    for (int coordinate : topStrip) {
-                        if (coordinate == 1) {
-                            int[] land = {row, collumn};
-                            landCoordinates.add(land);
-                        }
-                        collumn++;
-                    }
-                    collumn--;
-                } 
-                
-                // Right edge Traverse
-                if (collumn == landStripLength-1 && row == 0) {
-                    int r;
-                    for (r = row; r < landStripLength; r++) {
-                        int[] currentStrip = landPlot[r];
-                        int coordinate = currentStrip[collumn];
-                        if (coordinate == 1) {
-                            int[] land = {r, collumn};
-                            landCoordinates.add(land);
-                        }
-                    }
-                    row = r-1;
-                }
-                
-                //Bottom Traverse
-                if (collumn == landStripLength-1 && row == landStripLength-1) {
-                    int[] bottomStrip = landPlot[row];
-                    while (collumn >= 0) {
-                        int coordinate = bottomStrip[collumn];
-                        if (coordinate == 1) {
-                            int[] land = {row, collumn};
-                            landCoordinates.add(land);
-                        }
-                        collumn--;
-                    }
-                    collumn++;
-                }
-
-                // Left Edge traverse
-                if (collumn == 0 && row == landStripLength-1) {
-                    row--;
-                    while (row > 1) {
-                        int[] currentStrip = landPlot[row];
-                        int coordinate = currentStrip[collumn];
-                        if (coordinate == 1) {
-                            int[] land = {row, collumn};
-                            landCoordinates.add(land);
-                        }
-                        row--;
-                    }
-                }
-            }
-
-            
-            
-            int[][] landCoordinatesArray = landCoordinates.toArray(new int[landCoordinates.size()][]);
-            
-            // Creating/Adding all borderLands to the field
-            this.borderLands = landCoordinatesArray;
+            x++;
         }
+        x--;
+
+        y++;
+
+//        right side, moving down
+        while (y < landPlot.length) {
+            if (landPlot[y][x] == 1) {
+                recursiveFindLands(y, x);
+            }
+            y++;
+        }
+        y--;
+        
+//        bottom, moving left
+        x--;
+        while (x >= 0) {
+            if (landPlot[y][x] == 1) {
+                recursiveFindLands(y, x);
+            }
+            x--;
+        }
+        x++;
+        
+        y--;
+        while (y >= 0) {
+            if (landPlot[y][x] == 1) {
+                recursiveFindLands(y, x);
+            }
+            y--;
+        }
+        getIslands();
     }
 
+    private void recursiveFindLands(int y, int x) {
 
-    // Should return something
-    private void findIslands() {
+        landPlot[y][x] = landMarker;
+        int[] toAdd = new int[2];
+        toAdd[0] = y+1;
+        toAdd[1] = x+1;
 
-        if (islands != null) {
+        landPeninsulas.add(toAdd);
 
-            if (landStripLength == 2) {
-                System.out.println("A 2x2 plot cannot have any islands");
-            } else if (landStripLength == 3) {
-                if (borderLands == null && landPlot[1][1] == 1) {
-                    int[] island = {1, 1};
-                    this.islands = new int[1][1];
-                    this.islands[0] = island;
-                } else {
-                    System.out.println("No islands found");
-                }
+        // While not on left edge
+        if (x != 0) {
+            if (landPlot[y][x-1] == 1) {
+                recursiveFindLands(y, x-1);
             }
         }
-
-
+        
+        //While not at bottom
+        if (y != landPlot.length-1) {
+            if (landPlot[y+1][x] == 1) {
+                recursiveFindLands(y+1, x);
+            }
+        }
+        
+        //While not at right edge
+        if (x != landPlot[0].length-1) {
+            if (landPlot[y][x+1] == 1) {
+                recursiveFindLands(y, x+1);
+            }        }
+        
+        //While not at left edge
+        if (y != 0) {
+            if (landPlot[y-1][x] == 1) {
+                recursiveFindLands(y-1, x);
+            }        
+        }
     }
+}
+        
 
 
-
-} // Class
+ 
